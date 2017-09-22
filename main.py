@@ -20,22 +20,34 @@ def generate_wing(a,c,d,n):
         x[k] = (z[k].real)
         y[k] = (z[k].imag)
         wing[k] = [x[k], y[k]]
-    return(x,y,wing)
+    return(z,x,y,wing)
 
 
 
-def generate_mesh(wing):
-    points = np.zeros((10*n,2))
-    for h in range(0,10):
-        rapport = np.exp(h/10) - 1
-        for k in range(n):
-            argu = phase(z[k])
-            zc = exp(complex(0,argu))
-            z0 = complex(wing[k,0],wing[k,1]) + zc*rapport
-            points[h*n+k] =  [z0.real,z0.imag]
+def generate_mesh(wing_complex,nbr_of_meshes):
+    n = len(wing_complex)
+    points = np.zeros((nbr_of_meshes*n,2))
+    for h in range(nbr_of_meshes):
+        rapport = np.exp(h*h/(nbr_of_meshes*nbr_of_meshes)) - 1
+        for k in range(n-1):
+            zprime = wing_complex[k+1] - wing_complex[k]
+            argu = phase(zprime)
+            zc = exp(complex(0,np.pi/2 + argu))
+            zf = (wing_complex[k+1] + wing_complex[k]) / 2
+            z0 = zf + zc*rapport
+            points[h*n+k,0] =  z0.real
+            points[h * n + k, 1] = z0.imag
+        zprime = wing_complex[0] - wing_complex[n-1]
+        argu = phase(zprime)
+        zc = exp(complex(0, np.pi / 2 + argu))
+        zf = (wing_complex[0] + wing_complex[n-1]) / 2
+        z0 = zf + zc * rapport
+        points[(h + 1) * n - 1,0] = z0.real
+        points[(h + 1) * n - 1, 1] = z0.imag
     return(points)
 
-a, b, p = generate_wing(5, 0.5, 0.4, 50)
+a, b, c, p0 = generate_wing(5, 0.5, 0.4, 100)
+p = generate_mesh(a,20)
 tri = scsp.Delaunay(p)
 
 
