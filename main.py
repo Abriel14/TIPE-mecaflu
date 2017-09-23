@@ -8,11 +8,12 @@ import scipy.spatial as scsp
 def function_wing(a, c, d, theta):
     r = abs(complex(c - a, d))
     return (
-    0.5 * ((complex(c, d) + r * exp(complex(0, theta))) + (a * a) / (complex(c, d) + r * exp(complex(0, theta)))))
+        0.5 * ((complex(c, d) + r * exp(complex(0, theta))) + (a * a) / (complex(c, d) + r * exp(complex(0, theta)))))
 
 
 def generate_wing(a, c, d, n):
-    theta = np.linspace(0, 2 * np.pi, n)
+    ##fonction renvoyant la liste des points (complexes, et dans R²) de l'aile
+    theta = np.linspace(-np.pi, np.pi, n)
     wing_complex = np.zeros(n) * complex(0, 1)
     x = np.zeros(n)
     y = np.zeros(n)
@@ -22,7 +23,7 @@ def generate_wing(a, c, d, n):
         x[k] = (wing_complex[k].real)
         y[k] = (wing_complex[k].imag)
         wing[k] = [x[k], y[k]]
-    return (wing_complex, x, y, wing)
+    return (x, y, wing, wing_complex,)
 
 
 def generate_layers(wing_complex, nbr_of_layers):
@@ -58,20 +59,32 @@ def generate_layers(wing_complex, nbr_of_layers):
     points = np.zeros((n * nbr_of_layers, 2))
     for k in range(n * nbr_of_layers):
         points[k] = [points_complex[k].real, points_complex[k].imag]
-
     return (points)
 
 
 def generate_meshes(a, c, d, n, nbr_of_layers):
-    wing_complex, x, y, wing = generate_wing(a, c, d, n)
-    points = generate_layers(wing_complex,nbr_of_layers)
-    meshes = scsp.Delaunay(points)
-    return (points,meshes)
+    ##Fonction renvoyant la liste des meshes, la liste des barycentres de tout les meshes et une liste des indice des mesh etant dans l'aile.
+    x, y, wing, wing_complex = generate_wing(a, c, d, n)
+    points = generate_layers(wing_complex, nbr_of_layers)
+    all_meshes = scsp.Delaunay(points)
+    nbr_of_tri = len(all_meshes.simplices)
+    all_bary = np.zeros((nbr_of_tri, 2))
+    for k in range(nbr_of_tri):
+        [[xa, ya], [xb, yb], [xc, yc]] = points[all_meshes.simplices[k]]
+        all_bary[k] = [(xa + xb + xc) / 3, (ya + yb + yc) / 3]
+    ##tester si les 3 sommet de chaque triangle appartient à l'ensemble des sommets de l'aile et si oui l'ajouter au masque
+    mask = []
+    for k in range(nbr_of_tri):
+        if np.isin(points[all_meshes.simplices[k]], wing).all() == True:
+            mask.append(k)
+    return (all_meshes, all_bary, mask)
 
 
-
-p0, tri1 = generate_meshes(5, 0.5, 0.4, 100 , 10)
+tri1, barycentres, mask = generate_meshes(5, 0.5, 0.4, 50, 2)
+p0 = tri1.points
+print(mask)
 plt.triplot(p0[:, 0], p0[:, 1], tri1.simplices.copy())
 plt.plot(p0[:, 0], p0[:, 1], 'o')
+plt.plot(barycentres[:, 0][mask], barycentres[:, 1][mask], 'o')
 
 plt.show()
