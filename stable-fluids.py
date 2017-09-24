@@ -40,7 +40,7 @@ def diffuse_step():
     linear_solver(2, v, v0, a, 1 + 4 * a, kmax)
 
 
-def advection(b, d, d0, u, v):
+def advection(b, d, d0):
     dt0 = dt * N
     for i in range(N):
         for j in range(N):
@@ -56,11 +56,18 @@ def advection(b, d, d0, u, v):
             if y >= N - 1: y = N - 2
             j0 = int(y)
             j1 = j0 + 1
-            #interpolation:
+            # interpolation:
             s1 = x - i0
             s0 = 1 - s1
             t1 = y - j0
             t0 = 1 - t1
             d[i, j] = s0 * (t0 * d0[i0, j0] + t1 * d0[i0, j1]) + s1 * (t0 * d0[i1, j0] + t1 * d0[i1, j1]);
     apply_bound(b, d)
+
+
+def advection_step():
+    (u0, u) = (u, u0)
+    (v0, v) = (v, v0)
+    advection(1, u, u0)
+    advection(2, v, v0)
 
