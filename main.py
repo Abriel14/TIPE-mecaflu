@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from cmath import *
-import meshpy as mp
 import scipy.spatial as scsp
 
 
