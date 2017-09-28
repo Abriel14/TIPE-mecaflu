@@ -7,11 +7,11 @@ plt.figure(1)
 plt.ion()
 N = 30  # largeur et hauteur de la grille de calcul
 kmax = 200  # nombre d'itérations à effectuer (solveur)
-diff = 0.01  # coefficient de diffusion
-vitesse = 0.1
-ut = np.ones((N, N)) * vitesse # composante horizontale des vecteurs vélocité
+diff = 0.001  # coefficient de diffusion
+vitesse = 1
+ut = np.zeros((N, N)) * vitesse # composante horizontale des vecteurs vélocité
 vt = np.zeros((N, N))  # composante verticale des vecteurs vélocité
-u0t = np.ones((N, N)) * vitesse
+u0t = np.zeros((N, N)) * vitesse
 v0t = np.zeros((N, N))  # tableaux temporaires relatifs à u et v
 p = np.zeros((N, N))
 div = np.zeros((N, N))

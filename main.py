@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.spatial as scsp
-
+from cmath import *
 
 def function_wing(a, c, d, theta):
     r = abs(complex(c - a, d))
@@ -78,11 +78,11 @@ def generate_meshes(a, c, d, n, nbr_of_layers):
     return (all_meshes, all_bary, mask)
 
 
-tri1, barycentres, mask = generate_meshes(5, 0.5, 0.4, 50, 2)
+tri1, barycentres, mask = generate_meshes(5, 0.5, 0.4,100 , )
 p0 = tri1.points
 print(mask)
 plt.triplot(p0[:, 0], p0[:, 1], tri1.simplices.copy())
 plt.plot(p0[:, 0], p0[:, 1], 'o')
-plt.plot(barycentres[:, 0][mask], barycentres[:, 1][mask], 'o')
+#plt.plot(barycentres[:, 0][mask], barycentres[:, 1][mask], 'o')
 
 plt.show()

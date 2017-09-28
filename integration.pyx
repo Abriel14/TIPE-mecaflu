@@ -8,17 +8,22 @@ ctypedef np.float_t DTYPE_f
 
 def apply_bound(b,np.ndarray[DTYPE_f, ndim=2] x,ta):
     N = x.shape[0]
-    if b == 4:  # champs de pression
-        for i in range(int(N / 2) - ta, int(N / 2) + ta):
-            for j in range(int(N / 2 - ta), int(N / 2) + ta):
+    if b == 0:  # champs de pression
+        for k in range(int(N / 2) - ta, int(N / 2) + ta + 1):
+            x[int(N / 2) - ta-1,k] += x[int(N / 2) - ta,k]
+            x[int(N / 2) + ta + 1,k] += x[int(N / 2) + ta,k]
+            x[k,int(N / 2) - ta-1] += x[k,int(N / 2) - ta]
+            x[k,int(N / 2) + ta] += x[k,int(N / 2) + ta-1]
+        for i in range(int(N / 2) - ta, int(N / 2) + ta +1):
+            for j in range(int(N / 2) - ta, int(N / 2) + ta +1):
                 x[i, j] = 0
     if b == 1:  # horizontal
-        for i in range(int(N / 2) - ta, int(N / 2) + ta):
-            for j in range(int(N / 2) - ta-1, int(N / 2) + ta+1):
+        for i in range(int(N / 2) - ta, int(N / 2) + ta +1):
+            for j in range(int(N / 2) - ta-1, int(N / 2) + ta+2):
                 x[i, j] = 0
     if b == 2:  # vertical
-        for i in range(int(N / 2) - ta-1, int(N / 2) + ta+1):
-            for j in range(int(N / 2) - ta, int(N / 2) + ta):
+        for i in range(int(N / 2) - ta-1, int(N / 2) + ta+2):
+            for j in range(int(N / 2) - ta, int(N / 2) + ta+1):
                 x[i, j] = 0
 
 
@@ -65,7 +70,7 @@ def advection(b, np.ndarray[DTYPE_f, ndim=2] d,np.ndarray[DTYPE_f, ndim=2] d0,np
             s0 = 1 - s1
             t1 = y - j0
             t0 = 1 - t1
-            d[i, j] = s0 * (t0 * d0[i0, j0] + t1 * d0[i0, j1]) + s1 * (t0 * d0[i1, j0] + t1 * d0[i1, j1]);
+            d[i, j] = s0 * (t0 * d0[i0, j0] + t1 * d0[i0, j1]) + s1 * (t0 * d0[i1, j0] + t1 * d0[i1, j1])
     apply_bound(b, d,ta)
 
 
@@ -83,8 +88,8 @@ def projection(np.ndarray[DTYPE_f, ndim=2] u,np.ndarray[DTYPE_f, ndim=2] v,np.nd
         for j in range(1, N - 1):
             div[i, j] = -0.5 * f * (u[i + 1, j] - u[i - 1, j] + v[i, j + 1] - v[i, j - 1]) / N
             p[i,j] = 0
-        apply_bound(0, div,ta)
-        apply_bound(0, p,ta)
+    apply_bound(0, div,ta)
+    apply_bound(0, p,ta)
 
     ## Résolution du système
     linear_solver(0, p, div, 1, 4, kmax,ta);
@@ -95,7 +100,7 @@ def projection(np.ndarray[DTYPE_f, ndim=2] u,np.ndarray[DTYPE_f, ndim=2] v,np.nd
             u[i, j] -= 0.5 * f * N * (p[i + 1, j] - p[i - 1, j])
             v[i, j] -= 0.5 * f * N * (p[i, j + 1] - p[i, j - 1])
 
-    #apply_bound(1, u,ta)
+    apply_bound(1, u,ta)
     apply_bound(2, v,ta)
 
 
